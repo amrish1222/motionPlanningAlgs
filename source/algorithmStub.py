@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
+import time
+
 from queue import PriorityQueue
 
 maxVal = sys.float_info.max
@@ -25,4 +27,9 @@ class AlgorithmStub():
         self.env = env
     
     def executeAlg(self):
+        # executes and returns path, time taken
+        startTime = time.time()
+        
+        endTime = time.time()
+        totalTimeTaken = (endTime - startTime)
         pass
