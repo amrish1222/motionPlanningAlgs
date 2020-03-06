@@ -11,7 +11,7 @@ class Environment:
         self.res = resolution
         self.totalClearance = botRadius
         self.startPt = [0.0, 0.0]
-        self.goalPt = [11.0,10.0]
+        self.goalPt = [8.0,4.5]
         self.MAP_X, self.MAP_Y = 11.1, 10.1
         self.GRID_NX, self.GRID_NY = int(self.MAP_X/self.res), int(self.MAP_Y/self.res)
         self.obstacleSet = self.getObstacleSet()
@@ -19,6 +19,7 @@ class Environment:
         self.obstacleMap = self.getObstacleMap()
         
         self.runningMap = np.copy(self.obstacleMap)
+        self.renderCounter = 0
         
     def getObstacleSet(self):
         outputSet = set([])
@@ -32,6 +33,9 @@ class Environment:
     def isPtInObs(self, x, y):
         temp = self.getGridPt([x,y])
         return temp in self.obstacleSet
+    
+    def isGridPtInObs(self, pt):
+        return pt in self.obstacleSet
     
     def getGridPt(self,pt):
         return (math.floor(pt[0]/self.res), math.floor(pt[1]/self.res))
@@ -79,11 +83,33 @@ class Environment:
     def render(self):
         self.runningMap = self.updateMap(self.runningMap,self.getGridPt(self.startPt),1)
         self.runningMap = self.updateMap(self.runningMap,self.getGridPt(self.goalPt),2)
-        toDisplay = cv2.resize(self.runningMap,(self.GRID_NY * 1000 // self.GRID_NX,1000), interpolation = cv2.INTER_AREA)
-        cv2.imshow("",np.rot90(toDisplay,1))
-        cv2.waitKey(1)
+        if self.renderCounter%60 == 0:
+            toDisplay = cv2.resize(self.runningMap,(self.GRID_NY * 1000 // self.GRID_NX,1000), interpolation = cv2.INTER_AREA)
+            cv2.imshow("",np.rot90(toDisplay,1))
+            cv2.waitKey(1)
+        self.renderCounter+=1
+        
+    def setVisitedAndRender(self, pt):
+        self.runningMap = self.updateMap(self.runningMap,pt,3)
+        self.runningMap = self.updateMap(self.runningMap,self.getGridPt(self.goalPt),2)
+        if self.renderCounter%60 == 0:
+            toDisplay = cv2.resize(self.runningMap,(self.GRID_NY * 1000 // self.GRID_NX,1000), interpolation = cv2.INTER_AREA)
+            cv2.imshow("",np.rot90(toDisplay,1))
+            cv2.waitKey(1)
+        self.renderCounter+=1
+        
+    def setPathAndRender(self, pt):
+        self.runningMap = self.updateMap(self.runningMap,pt,5)
+        self.runningMap = self.updateMap(self.runningMap,self.getGridPt(self.startPt),1)
+        self.runningMap = self.updateMap(self.runningMap,self.getGridPt(self.goalPt),2)
+        if self.renderCounter%2 == 0:
+            toDisplay = cv2.resize(self.runningMap,(self.GRID_NY * 1000 // self.GRID_NX,1000), interpolation = cv2.INTER_AREA)
+            cv2.imshow("",np.rot90(toDisplay,1))
+            cv2.waitKey(1)
+        self.renderCounter+=1
     
     def reset(self):
         # reset image to obstacle
         self.runningMap = np.copy(self.obstacleMap)
+        self.renderCounter = 0
         pass
